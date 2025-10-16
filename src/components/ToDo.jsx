@@ -1,11 +1,39 @@
 import EditTask from "./EditTask";
+import { useEffect, useState } from "react";
 
 const ToDo = ({ task, taskList, setTaskList }) => {
+	const [time, setTime] = useState(task.duration);
+	const [running, setRunning] = useState(false);
+
+	useEffect(() => {
+		let interval;
+
+		if (running) {
+			interval = setInterval(() => {
+				setTime((prevTime) => prevTime + 10);
+			}, 10)
+		} else {
+			clearInterval(interval);
+		}
+		return () => clearInterval(interval);
+	}, [running]);
+
+	const handleStop = () => {
+		setRunning(false);
+		const taskIndex = taskList.indexOf(task);
+		taskList.splice(taskIndex, 1, {
+			...task,
+			duration: time,
+		});
+		localStorage.setItem('taskList', JSON.stringify(taskList));
+		window.location.reload();
+	};
+
 	const handleDelete = (itemId) => {
 		const index = taskList.indexOf(task);
 		taskList.splice(index, 1);
-		console.log('itemId', itemId);
-		setTaskList((currentTasks) => currentTasks.filter((todo) => todo.id != itemId))
+		localStorage.setItem('taskList', JSON.stringify(taskList));
+		window.location.reload();
 	}
 
 	return (
@@ -16,6 +44,22 @@ const ToDo = ({ task, taskList, setTaskList }) => {
 					<EditTask task={task} taskList={taskList} setTaskList={setTaskList} />
 				</div>
 				<p className="text-lg py-2">{task.taskDescription}</p>
+				<div className="w-full flex flex-row items-center justify-evenly">
+					<div className="w-1/4 text-xl font-semibold py-4">
+						<span>{('0' + Math.floor((time / 3600000) % 24)).slice(-2)}:</span>
+						<span>{('0' + Math.floor((time / 6000) % 60)).slice(-2)}:</span>
+						<span>{('0' + Math.floor((time / 1000) % 60)).slice(-2)}</span>
+						<span className="text-sm">:{('0' + ((time / 10) % 100)).slice(-2)}</span>
+					</div>
+					<div className="flex flex-row justify-evenly gap-4">
+						{running ? (
+							<button className="border rounded-lg py-1 px-3" onClick={handleStop}>Stop</button>
+						): (
+							<button className="border rounded-lg py-1 px-3" onClick={() => setRunning(true)}>Start</button>
+						)}
+						<button className="border rounded-lg py-1 px-3" onClick={() => setTime(0)}>Reset</button>
+					</div>
+				</div>
 				<div className="w-full flex justify-center">
 					<button 
 						className="bg-red-500 text-white text-sm uppercase font-semibold py-1.5 px-3 mt-6 mb-1 rounded-lg"

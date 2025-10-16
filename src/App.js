@@ -1,9 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AddTask from "./components/AddTask";
 import ToDo from "./components/ToDo";
 
 function App() {
   const [taskList, setTaskList] = useState([]);
+
+  useEffect(() => {
+    const taskListLocalStorage = localStorage.getItem('taskList');
+    if (taskListLocalStorage) {
+      setTaskList(JSON.parse(taskListLocalStorage))
+    }
+  }, []);
 
   return (
     <>
@@ -16,10 +23,8 @@ function App() {
       </div>
       <div>
         <h2 className="ml-6 text-xl font-semibold w-3/4 max-w-lg my-4 py-2 px-2 bg-gray-300">To Do:</h2>
-        {taskList.slice(0).reverse().map((task, i) => (
-          <>
-            <ToDo key={new Date().getTime()} task={task} taskList={taskList} setTaskList={setTaskList} />
-          </>
+        {taskList.map((task, i) => (
+          <ToDo key={i} task={task} taskList={taskList} setTaskList={setTaskList} />
         ))}
       </div>
     </>

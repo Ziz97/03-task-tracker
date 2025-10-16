@@ -29,8 +29,14 @@ const EditTask = ({ task, taskList, setTaskList }) => {
 			setErrorMessage('Enter project name to continue');
 		} else {
 			const index = taskList.indexOf(task);
-			taskList.splice(index, 1)
-			setTaskList([...taskList, { projectName, taskDescription }]);
+			taskList.splice(index, 1, {
+				projectName,
+				taskDescription,
+				timeStamp: task.timeStamp,
+				duration: task.duration,
+			})
+			localStorage.setItem('taskList', JSON.stringify(taskList));
+			window.location.reload();
 			setEditModal(false);
 		}
 	};
