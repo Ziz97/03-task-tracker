@@ -2,7 +2,7 @@ import EditTask from "./EditTask";
 import { useEffect, useState } from "react";
 import { useDrag } from "react-dnd";
 
-const ToDo = ({ task, index, taskList, setTaskList }) => {
+const ToDo = ({ task, index, taskList, setTaskList, completed }) => {
 	const [time, setTime] = useState(task.duration);
 	const [running, setRunning] = useState(false);
 	const [{isDragging}, drag] = useDrag(() => ({
@@ -43,7 +43,7 @@ const ToDo = ({ task, index, taskList, setTaskList }) => {
 	const handleDelete = (itemId) => {
 		const index = taskList.indexOf(task);
 		taskList.splice(index, 1);
-		localStorage.setItem('taskList', JSON.stringify(taskList));
+		localStorage.setItem(completed ? 'completed' : 'taskList', JSON.stringify(taskList));
 		window.location.reload();
 	}
 
@@ -52,7 +52,7 @@ const ToDo = ({ task, index, taskList, setTaskList }) => {
 			<div className="flex flex-col items-start justify-start bg-white my-4 py-4 px-6 w-3/4 max-w-lg" ref={drag}>
 				<div className="w-full flex flex-row justify-between">
 					<p className="font-semibold text-xl">{task.projectName}</p>
-					<EditTask task={task} taskList={taskList} setTaskList={setTaskList} />
+					{!completed ? <EditTask task={task} taskList={taskList} setTaskList={setTaskList} /> : <></>}
 				</div>
 				<p className="text-lg py-2">{task.taskDescription}</p>
 				<div className="w-full flex flex-col sm:flex-row items-center justify-center sm:justify-evenly">
@@ -62,14 +62,15 @@ const ToDo = ({ task, index, taskList, setTaskList }) => {
 						<span>{('0' + Math.floor((time / 1000) % 60)).slice(-2)}</span>
 						<span className="text-sm">:{('0' + ((time / 10) % 100)).slice(-2)}</span>
 					</div>
-					<div className="flex flex-row justify-evenly gap-4">
-						{running ? (
-							<button className="border rounded-lg py-1 px-3" onClick={handleStop}>Stop</button>
-						): (
-							<button className="border rounded-lg py-1 px-3" onClick={() => setRunning(true)}>Start</button>
-						)}
-						<button className="border rounded-lg py-1 px-3" onClick={() => setTime(0)}>Reset</button>
-					</div>
+					{!completed ? 
+						<div className="flex flex-row justify-evenly gap-4">
+							{running ? (
+								<button className="border rounded-lg py-1 px-3" onClick={handleStop}>Stop</button>
+							): (
+								<button className="border rounded-lg py-1 px-3" onClick={() => setRunning(true)}>Start</button>
+							)}
+							<button className="border rounded-lg py-1 px-3" onClick={() => setTime(0)}>Reset</button>
+						</div> : <></>}
 				</div>
 				<div className="w-full flex justify-center">
 					<button 

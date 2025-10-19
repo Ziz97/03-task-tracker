@@ -4,8 +4,8 @@ import AddTask from "./components/AddTask";
 import ToDo from "./components/ToDo";
 
 function App() {
-  const [taskList, setTaskList] = useState([]);
-  const [completed, setCompleted] = useState([]);
+  const [taskList, setTaskList] = useState(JSON.parse(localStorage.getItem('taskList')) || []);
+  const [completed, setCompleted] = useState(JSON.parse(localStorage.getItem('completed')) || []);
   const [{isOver}, drop] = useDrop(() => ({
     accept: 'todo',
     drop: (item) => addCompleted(item),
@@ -14,20 +14,21 @@ function App() {
     }),
   }));
 
-  const addCompleted = (item) => {
-    const moveTask = taskList.filter((task) => task.id === item.id);
-    console.log('moveTask', moveTask);
-    console.log('item', item);
-    setCompleted([...completed, { ...item }]);
-    // setTaskList()
-  };
-
   useEffect(() => {
     const taskListLocalStorage = localStorage.getItem('taskList');
     if (taskListLocalStorage) {
-      setTaskList(JSON.parse(taskListLocalStorage))
+      setTaskList(JSON.parse(taskListLocalStorage));
+    }
+    const completedLocalStorage = localStorage.getItem('completed');
+    if (completedLocalStorage) {
+      setCompleted(JSON.parse(completedLocalStorage));
     }
   }, []);
+
+  const addCompleted = (item) => {
+    localStorage.setItem('completed', JSON.stringify([...completed, item]));
+    window.location.reload();
+  };
 
   return (
     <>
@@ -49,9 +50,11 @@ function App() {
         </div>
         <div className="w-full flex flex-col" ref={drop}>
           <h2 className="text-xl font-semibold w-3/4 max-w-lg my-4 py-2 px-2 bg-gray-300">Completed:</h2>
-          {completed.map((task, i) => (
-            <ToDo key={i} task={task} completed={completed} setCompleted={setCompleted} />
-          ))}
+          <div className="flex flex-col-reverse">
+            {completed.map((task, i) => (
+              <ToDo key={i} task={task} taskList={completed} setTaskList={setCompleted} completed={true} />
+            ))}
+          </div>
         </div>
       </div>
     </>
