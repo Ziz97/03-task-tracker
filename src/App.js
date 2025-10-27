@@ -27,6 +27,9 @@ function App() {
 
   const addCompleted = (item) => {
     localStorage.setItem('completed', JSON.stringify([...completed, item]));
+    const index = taskList.indexOf(item);
+		taskList.splice(index, 1);
+		localStorage.setItem('taskList', JSON.stringify(taskList));
     window.location.reload();
   };
 
